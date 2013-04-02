@@ -1,0 +1,6 @@
+name = Mailchimp Webhook
+description = Provides HTTP endpoints for MailChimp webhooks
+core = 7.x
+package = MailChimp
+dependencies[] = mailchimp_campaign
+dependencies[] = restws

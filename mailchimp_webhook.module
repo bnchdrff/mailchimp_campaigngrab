@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file mailchimp_webhook.module
+ */
+
+/**
+ * Implements hooks_restws_resource_info
+ */
+function mailchimp_webhook_restws_resource_info() {
+  return array(
+    'mailchimp_webhook_campaign' => array(
+      'label' => t('MailChimp Campaign'),
+      'class' => 'MailchimpWebhookCampaignResourceController',
+      'menu_path' => 'api/mailchimpcampaign',
+    ),
+  );
+}
+
+
