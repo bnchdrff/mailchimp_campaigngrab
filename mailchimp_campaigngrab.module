@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * @file mailchimp_webhook.module
+ */
+
+function mailchimp_campaigngrab_mailchimp_webhook($type, $data) {
+  if ($type == 'campaign') {
+    $q = mailchimp_get_api_object();
+    $template = $q->campaignTemplateContent($data['id']);
+    $campaign = entity_create('mailchimp_campaign', array(
+      'mc_campaign_id' => $data['id'],
+      'template' => $template,
+      'subject' => $data['subject'],
+    ));
+    mailchimp_campaign_save($campaign);
+  }
+}

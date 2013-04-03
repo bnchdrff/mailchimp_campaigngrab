@@ -1,0 +1,6 @@
+name = Mailchimp Campaign Grab
+description = Grabs campaigns when they're sent
+core = 7.x
+package = MailChimp
+dependencies[] = mailchimp_campaigngrab
+dependencies[] = restws
