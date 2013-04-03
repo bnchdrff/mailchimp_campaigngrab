@@ -4,8 +4,35 @@
  * @file mailchimp_webhook.module
  */
 
+/**
+ * Implements hook_menu
+ *
+ * Show a list of potential webhook campaign endpoint URLs to be included
+ * in the MailChimp.com-side configuration
+ */
+function mailchimp_campaigngrab_menu() {
+  $items = array();
+
+  $items['admin/config/services/mailchimp/campaigngrab'] = array(
+    'title' => 'Webhook URL',
+    'description' => 'Webhook URL to which MailChimp can post campaigns',
+    'page callback' => 'mailchimp_campaigngrab_webhookurl_page',
+    'access arguments' => array('administer mailchimp'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'mailchimp_campaigngrab.admin.inc',
+    'weight' => -10
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_mailchimp_webhook
+ *
+ * If the webhook is a campaign send, create a record of that campaign being sent
+ */
 function mailchimp_campaigngrab_mailchimp_webhook($type, $data) {
-  if ($type == 'campaign') {
+  if ($type == 'campaign' && $data['status'] == 'sent') {
     $q = mailchimp_get_api_object();
     $template = $q->campaignTemplateContent($data['id']);
     $campaign = entity_create('mailchimp_campaign', array(
