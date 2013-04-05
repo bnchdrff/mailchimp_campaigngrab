@@ -34,10 +34,19 @@ function mailchimp_campaigngrab_menu() {
 function mailchimp_campaigngrab_mailchimp_webhook($type, $data) {
   if ($type == 'campaign' && $data['status'] == 'sent') {
     $q = mailchimp_get_api_object();
+    // mailchimp_campaigns expects $template to be a drupal render array
+    // so we grab a mailchimp-looking format and modify the template values:
+    // 'template' => array('value' => $template, 'format' => $mc_format)
+    $mc_format = (array_key_exists('mailchimp_campaign', filter_formats())) ? 'mailchimp_campaign' : 'plain_text';
     $template = $q->campaignTemplateContent($data['id']);
+    $renderable_template = array();
+    foreach ($template as $fieldname => $fieldvalue) {
+      $renderable_template[$fieldname]['format'] = $mc_format;
+      $renderable_template[$fieldname]['value'] = $fieldvalue;
+    }
     $campaign = entity_create('mailchimp_campaign', array(
       'mc_campaign_id' => $data['id'],
-      'template' => $template,
+      'template' => $renderable_template,
       'subject' => $data['subject'],
     ));
     mailchimp_campaign_save($campaign);
