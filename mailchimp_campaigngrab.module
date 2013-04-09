@@ -1,11 +1,11 @@
 <?php
 
 /**
- * @file mailchimp_webhook.module
+ * @file mailchimp_campaigngrab.module
  */
 
 /**
- * Implements hook_menu
+ * Implements hook_menu().
  *
  * Show a list of potential webhook campaign endpoint URLs to be included
  * in the MailChimp.com-side configuration
@@ -14,22 +14,34 @@ function mailchimp_campaigngrab_menu() {
   $items = array();
 
   $items['admin/config/services/mailchimp/campaigngrab'] = array(
-    'title' => 'Webhook URL',
-    'description' => 'Webhook URL to which MailChimp can post campaigns',
-    'page callback' => 'mailchimp_campaigngrab_webhookurl_page',
+    'title' => 'Campaign Grabber',
+    'description' => 'Grab campaigns when MailChimp sends them',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mailchimp_campaigngrab_admin'),
     'access arguments' => array('administer mailchimp'),
     'type' => MENU_LOCAL_TASK,
     'file' => 'mailchimp_campaigngrab.admin.inc',
     'weight' => -10
   );
 
+  $items['admin/config/services/mailchimp/campaigns/%mailchimp_campaign/createnode'] = array(
+    'title' => 'Create node',
+    'page callback' => 'mailchimp_campaigngrab_createnode',
+    'page arguments' => array(5),
+    'access arguments' => array('administer mailchimp'),
+    'file' => 'mailchimp_campaigngrab.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 3
+  );
+
   return $items;
 }
 
 /**
- * Implements hook_mailchimp_webhook
+ * Implements hook_mailchimp_webhook().
  *
- * If the webhook is a campaign send, create a record of that campaign being sent
+ * If the webhook is a campaign send, create a record of that campaign being
+ * sent.
  */
 function mailchimp_campaigngrab_mailchimp_webhook($type, $data) {
   if ($type == 'campaign' && $data['status'] == 'sent') {
@@ -52,3 +64,44 @@ function mailchimp_campaigngrab_mailchimp_webhook($type, $data) {
     mailchimp_campaign_save($campaign);
   }
 }
+
+/**
+ * Implements drupal_alter().
+ *
+ * Adds an action to the MailChimp Campaigns page to copy a campaign as a new
+ * node.
+ */
+function mailchimp_campaigngrab_mailchimp_campaign_actions_alter(&$actions, $context) {
+  $content = array();
+  if (gettype($context['campaign']->template) == 'string') {
+    // let's not allow for converting non-template campaigns quite yet...
+    //$content['email']['format'] = 'mailchimp_campaign';
+    //$content['email']['value'] = $context['campaign']->template;
+  }
+  else if (gettype($context['campaign']->template) == 'array') {
+    $content = _mailchimp_campaigngrab_templateregions($context['campaign']->template);
+  }
+  if (count($content) > 0) {
+    $actions[] = l('Create node', 'admin/config/services/mailchimp/campaigns/' . $context['campaign']->mc_campaign_id . '/createnode');
+  }
+}
+
+/**
+ * Return a render array of template regions that we want to grab
+ *
+ * @param array $template
+ *   MailChimpCampaign->template
+ * @return array
+ */
+function _mailchimp_campaigngrab_templateregions($template) {
+  $content = array();
+  $regions_to_grab = explode(',', variable_get('mailchimp_campaigngrab_templateregions'));
+  foreach ($regions_to_grab as $region) {
+    if (array_key_exists($region, $template)) {
+      $content[$region] = $template[$region];
+    }
+  }
+  return $content;
+}
+
+

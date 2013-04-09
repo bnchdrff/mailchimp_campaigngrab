@@ -1,0 +1,14 @@
+<?php
+
+/**
+ * @file mailchimp_campaigngrab.install
+ */
+
+/**
+ * Implements hook_install().
+ */
+function mailchimp_campaigngrab_install() {
+  variable_set('mailchimp_campaigngrab_templateregions', 'main');
+  variable_set('mailchimp_campaigngrab_nodetype', 'weekly_update');
+}
+
