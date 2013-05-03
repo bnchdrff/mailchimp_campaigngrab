@@ -75,7 +75,7 @@ function mailchimp_campaigngrab_createnode($campaign) {
 
   $node = new StdClass();
   $node->type = variable_get('mailchimp_campaigngrab_nodetype', 'weekly_update');
-  $node->title = 'Newsletter: ' . date('F j, Y', $campaign->created);
+  $node->title = date('F j, Y', $campaign->created);
   $node->language = LANGUAGE_NONE;
   $node->status = 0;
   $node->body[$node->language][0]['value']   = $body;
