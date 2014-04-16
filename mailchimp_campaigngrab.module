@@ -38,12 +38,12 @@ function mailchimp_campaigngrab_menu() {
 }
 
 /**
- * Implements hook_mailchimp_webhook().
+ * Implements hook_mailchimp_process_webhook().
  *
  * If the webhook is a campaign send, create a record of that campaign being
  * sent.
  */
-function mailchimp_campaigngrab_mailchimp_webhook($type, $data) {
+function mailchimp_campaigngrab_mailchimp_process_webhook($type, $data) {
   if ($type == 'campaign' && $data['status'] == 'sent') {
     $q = mailchimp_get_api_object();
     // mailchimp_campaigns expects $template to be a drupal render array
